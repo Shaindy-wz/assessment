@@ -1,0 +1,44 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// הגדרת Enums לפי הדרישות [cite: 16]
+enum GameStatus {
+  Waiting
+  Live
+  Finished
+}
+
+enum PlayerRole {
+  Admin
+  Player
+}
+
+model User {
+  id    Int               @id @default(autoincrement())
+  games GameParticipant[]
+}
+
+model Game {
+  id           Int               @id @default(autoincrement())
+  status       GameStatus        @default(Waiting)
+  participants GameParticipant[]
+}
+
+model GameParticipant {
+  id      Int        @id @default(autoincrement())
+  userId  Int
+  gameId  Int
+  role    PlayerRole @default(Player)
+  score   Int        @default(0)
+  
+  user    User       @relation(fields: [userId], references: [id])
+  game    Game       @relation(fields: [gameId], references: [id])
+
+  @@unique([userId, gameId]) 
+}
